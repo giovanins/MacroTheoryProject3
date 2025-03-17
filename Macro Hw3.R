@@ -138,13 +138,82 @@ cor_matrix_US <- cor(US_data, use = "complete.obs")
 print(cor_matrix_US)
 
 
-####2
-
-
 
 
 
 ####3
 
+df <- read.csv("compustat_data.csv")
 
+library(tseries)
+library(urca)
+source(file="intord.R")
+library(dynlm)
+library(forecast)
+library(lmtest)
+library(dplyr)
+
+#make variables
+TLIAB <- df[,7]
+STOCK_EQ <- df[,8]
+CAP_EXP <- df[,9]
+REV <- df[,10]
+
+#ticker names
+#BA = Boeing
+#F = Ford
+#GE = General Electric
+#INTC = Intel
+
+debt_equity_ratio <- TLIAB / STOCK_EQ
+date <- as.Date(df$datadate, format = "%m/%d/%Y")
+
+
+#####
+library(dplyr)
+
+
+#####
+library(ggplot2)
+
+
+# Define the GFC shading period (2008-2009)
+gfc_period <- data.frame(
+  xmin = as.Date("2008-01-01"),
+  xmax = as.Date("2009-12-31"),
+  ymin = -Inf,
+  ymax = Inf
+)
+
+
+# Capital Expenditure Plot (All Firms, Shaded GFC)
+ggplot(df, aes(x = date, y = CAP_EXP, color = tic)) +
+  geom_rect(data = gfc_period, aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax),
+            fill = "grey50", alpha = 0.2, inherit.aes = FALSE) +  # Shaded GFC period
+  geom_smooth(se = FALSE, span = 0.3, linewidth = 1.2) +  # Smoothed lines
+  labs(title = "Capital Expenditure Over Time (Quarterly Data, GFC Highlighted)",
+       x = "Date", y = "Capital Expenditure", color = "Company") +  # Legend for firms
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# Revenue Plot (All Firms, Shaded GFC)
+ggplot(df, aes(x = date, y = REV, color = tic)) +
+  geom_rect(data = gfc_period, aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax),
+            fill = "grey50", alpha = 0.2, inherit.aes = FALSE) +  # Shaded GFC period
+  geom_smooth(se = FALSE, span = 0.3, linewidth = 1.2) +  # Smoothed lines
+  labs(title = "Revenue Over Time (Quarterly Data, GFC Highlighted)",
+       x = "Date", y = "Revenue", color = "Company") +  # Legend for firms
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+# Debt to Equity Ratio Plot (All Firms, Shaded GFC)
+ggplot(df, aes(x = date, y = debt_equity_ratio, color = tic)) +
+  geom_rect(data = gfc_period, aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax),
+            fill = "grey50", alpha = 0.2, inherit.aes = FALSE) +  # Shaded GFC period
+  geom_smooth(se = FALSE, span = 0.3, linewidth = 1.2) +  # Smoothed lines
+  labs(title = "Debt to Equity Ratio Over Time (Quarterly Data, GFC Highlighted)",
+       x = "Date", y = "Debt to Equity Ratio", color = "Company") +  # Legend for firms
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
